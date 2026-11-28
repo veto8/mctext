@@ -23,8 +23,8 @@ The app has a main McCLIM frame with groups, snippets, an editable text pane, bu
 - `src/store.lisp` — JSON document store with `id`, `_rev` and `doc`
 - `src/clipboard-log.lisp` — session-only clipboard log, watcher thread and reader commands
 - `src/clipboard.lisp` — clipboard shims for wl-copy/xclip/xsel, pbcopy and PowerShell
-- `src/theme.lisp` — Anathema theme definitions, activation and Settings status
-- `src/gui.lisp` — main frame and `clipboard-log-frame`, panes, presentation types, commands and translators
+- `src/theme.lisp` — Anathema theme definitions, activation and theme status
+- `src/gui.lisp` — main frame, `prompt-frame` and `clipboard-log-frame`, panes, presentation types, commands and translators
 - `src/cli.lisp` — `--list`, `--copy`, `--help` and no-window dispatch
 - `sdl2-runtime.lisp` — SDL2 runtime fix; loaded only for SDL2 builds, resets the user-event id, centers managed frames, moves McCLIM's SDL2 loop to the process main thread on macOS SBCL, and destroys the port and closes cl-sdl2's main-thread channel when the app exits
 - `sdl2.sh` — pins McCLIM 1.0.0 for SDL2 builds, registers a pinned `cl-sdl2` local project with the Apple Silicon spec on macOS ARM, and downloads `SDL2.dll` on Windows
@@ -72,10 +72,11 @@ Built executable:
 The user builds and runs all Lisp code. Do not compile or run Lisp code in the agent environment.
 
 ## Patterns
-- Frame names are `mctext-frame` and `clipboard-log-frame`; each has a command table of the same name.
+- Frame names are `mctext-frame`, `prompt-frame` and `clipboard-log-frame`; each has a command table of the same name.
+- Name prompts use `prompt-frame`: one white, single-line text field on gray with default McCLIM Save and Close buttons.
 - Both frames use `:reinitialize-frames t` so reloading `src/gui.lisp` rebuilds panes and layouts in running windows.
-- Menu bar is `mctext-menu-bar` with File, Edit, Settings and Help menus; the log window is opened from the button row.
-- Settings has Dark, Light and High contrast; startup uses Anathema's Doom One dark theme.
+- Menu bar is `mctext-menu-bar` with File, Edit and Help menus; the log window is opened from the button row.
+- Dark, Light and High contrast remain frame commands; startup uses Anathema's Doom One dark theme.
 - Presentation types are `mctext-group`, `mctext-snippet` and `clipboard-entry`.
 - Left click selects; right click opens commands from `:gesture :menu` translators; left-clicking a log entry saves it to the `Clipboard` group.
 - Clipboard copy uses external OS tools; McText does not inject keystrokes into other apps.
@@ -93,5 +94,5 @@ The user builds and runs all Lisp code. Do not compile or run Lisp code in the a
 - Do not add networking or telemetry.
 - Preserve the document store shape: `docs` entries contain `id`, `_rev` and `doc`.
 - Keep the clipboard log session-only; persist an entry only when the user clicks it.
-- Start with the dark theme; Settings switches themes at runtime and repaints the open frames.
+- Start with the dark theme; theme commands switch themes at runtime and repaint the open frames.
 - Apply workspace permissions after edits: `chown -R 1000:33 <project>` and `chmod -R g+w <project>`.

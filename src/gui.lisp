@@ -124,6 +124,47 @@
   (declare (ignore gadget))
   (invoke-command '(com-show-clipboard-log)))
 
+(defun cb-prompt-save (gadget)
+  (declare (ignore gadget))
+  (invoke-command '(com-prompt-save)))
+
+(defun cb-prompt-close (gadget)
+  (declare (ignore gadget))
+  (invoke-command '(com-prompt-close)))
+
+(define-application-frame prompt-frame ()
+  ((result :initform nil :accessor prompt-result)
+   (default :initform "" :initarg :default))
+  (:reinitialize-frames t)
+  (:command-table (prompt-frame :inherit-from (clim:accept-values)))
+  (:menu-bar nil)
+  (:panes
+   (entry-pane (make-pane 'text-editor-pane
+                          :nlines 1
+                          :ncolumns 40
+                          :value ""
+                          :background +white+
+                          :foreground +black+))
+   (save-button :push-button :label "Save" :activate-callback 'cb-prompt-save)
+   (close-button :push-button :label "Close" :activate-callback 'cb-prompt-close))
+  (:layouts
+   (default
+    (spacing (:thickness 6 :background +gray40+)
+      (horizontally (:spacing 6) entry-pane save-button close-button)))))
+
+(defmethod run-frame-top-level :before ((frame prompt-frame) &key)
+  (let ((pane (find-pane-named frame 'entry-pane)))
+    (when pane (setf (gadget-value pane) (slot-value frame 'default)))))
+
+(define-prompt-frame-command (com-prompt-save :name t) ()
+  (let* ((frame *application-frame*)
+         (pane (find-pane-named frame 'entry-pane)))
+    (setf (prompt-result frame) (and pane (gadget-value pane)))
+    (frame-exit frame)))
+
+(define-prompt-frame-command (com-prompt-close :name t) ()
+  (frame-exit *application-frame*))
+
 (define-application-frame mctext-frame ()
   ((group-id :initform nil :initarg :group-id)
    (snippet-id :initform nil :initarg :snippet-id)
@@ -271,13 +312,13 @@
 
 (defun prompt-string (frame prompt &optional default)
   (declare (ignore frame))
-  (let ((stream *query-io*)
-        (result nil))
-    (accepting-values (stream :own-window t
-                              :exit-boxes '((:exit "OK") (:abort "Cancel")))
-      (setf result (accept 'string :prompt prompt :stream stream
-                                   :default (or default ""))))
-    result))
+  (let ((dialog (make-application-frame 'prompt-frame
+                                        :pretty-name prompt
+                                        :width 460
+                                        :height 60
+                                        :default (or default ""))))
+    (run-frame-top-level dialog)
+    (prompt-result dialog)))
 
 (defun select-snippet (frame snippet)
   (save-current-text frame)
@@ -442,12 +483,6 @@
 (define-mctext-frame-command (com-theme-high-contrast :name t) ()
   (set-frame-theme *application-frame* :high-contrast))
 
-(define-command-table mctext-settings-menu
-  :inherit-from nil
-  :menu (("Dark" :command com-theme-dark)
-          ("Light" :command com-theme-light)
-          ("High contrast" :command com-theme-high-contrast)))
-
 (define-command-table mctext-file-menu
   :inherit-from nil
   :menu (("New group" :command com-new-group)
@@ -469,7 +504,6 @@
   :inherit-from nil
   :menu (("File" :menu mctext-file-menu)
           ("Edit" :menu mctext-edit-menu)
-          ("Settings" :menu mctext-settings-menu)
           ("Help" :menu mctext-help-menu)))
 
 (defun initialize-frame (frame)

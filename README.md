@@ -49,7 +49,7 @@ Run task 11 in `./ask.sh` to start a REPL with the GUI already open. A source wa
 ## GUI layout
 
 ```text
-File  Edit  Settings  Help
+File  Edit  Help
 
 [New group] [New Snippets] [Rename] [Save] [Copy] [Delete] [Clipboard log] [Quit]
 
@@ -64,7 +64,7 @@ Selected text:
 Status: Copied "Email reply" to clipboard.
 ```
 
-- Use the top menu bar for **File**, **Edit**, **Settings** and **Help** commands.
+- Use the top menu bar for **File**, **Edit** and **Help** commands.
 - Click a group to show its snippets.
 - Click a snippet to load its text.
 - Press **Copy** to copy the full text to the clipboard.
@@ -74,7 +74,7 @@ Status: Copied "Email reply" to clipboard.
 
 ## Theme
 
-McText starts with Anathema's Doom One dark theme, installed from Quicklisp. Use **Settings → Dark**, **Light** or **High contrast** to switch themes while the app is open.
+McText starts with Anathema's Doom One dark theme, installed from Quicklisp.
 
 ## Clipboard
 
